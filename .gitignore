@@ -218,3 +218,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Personal product data
+products.json
+history.json
+uploads/
+
+# Python temporary files
+__pycache__/
+*.pyc
+.venv/
+venv/
+.env
+.DS_Store
