@@ -1,8 +1,4 @@
 # BeautyMix
-A Python-based makeup recommendation app that helps users create personalised looks using products they already own.
-
-
-# BeautyMix
 
 BeautyMix is a Python-based makeup collection and recommendation prototype built with Streamlit. It helps users explore makeup looks using products they already own, rather than relying on a fixed product catalogue.
 
