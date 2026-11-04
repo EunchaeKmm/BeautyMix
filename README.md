@@ -1,110 +1,118 @@
 # BeautyMix
 
-BeautyMix is a Python-based makeup collection and recommendation prototype built with Streamlit. It helps users explore makeup looks using products they already own, rather than relying on a fixed product catalogue.
+BeautyMix is a Python and Streamlit prototype that recommends a makeup look using **only the products you already own**. Instead of pushing new purchases, it helps users rediscover how to combine the foundation, blush, eyeshadow and lip products already in their collection.
 
-Users can register makeup products, save product details and photos, choose a makeup vibe and context, and receive a suggested look with matching products from their own collection.
+It was built for the Creative Coding A2 Code Prototype Project. The focus is the recommendation logic: how product data (category, colour, finish) and context (vibe, occasion, weather, time) are turned into a look.
+
 
 ## Features
 
-- **Product registration:** Save a product name, category, colour (where relevant), finish and optional photo.
-- **My Collection:** View saved products, filter by category and remove products.
-- **Personalised look selection:** Choose a makeup vibe, occasion, weather and available time. BeautyMix selects a compatible look and considers the occasion.
-- **Product recommendations:** Match saved products using category, finish, colour palette, weather preferences and coordination with other selected products.
-- **Finishing touches:** View optional styling suggestions for bronzer, highlighter, brows, lashes and contact lens colours.
-- **Local data storage:** Save product details and recommendation history in JSON files.
+- **Add a Product:** save a name, category, finish and optional photo. Colour is chosen for Blush, Eyeshadow and Lip (Foundation has no colour). Colours can be typed in freely, and an eyeshadow palette can hold several colours.
+- **My Collection:** browse products as cards, filter by category, and open the `⋮` menu on a card to edit a product (including replacing its photo) or delete it.
+- **Create a Look:** choose a makeup vibe (or Surprise Me), occasion, weather and available time. BeautyMix picks a look from a library of ten and recommends products from your own collection.
+- **Results:** the look name, description and illustration; products grouped by category in application order; layering and placement notes; short reasons for every product; and warm or cool finishing touches (bronzer, highlighter, brows, contact lenses, lashes).
+- **Mood board (optional):** your own photos of the look are pinned top-right while you read the results. Use the arrows on the photo to switch between them.
+- **Local storage:** products and recommendation history are saved in JSON files, and photos are saved in `uploads/`, so they persist between sessions.
 
-## Technologies
+## Requirements
 
-- Python
-- Streamlit
-- JSON for local product and recommendation-history storage
-- Python standard-library modules: `json`, `random`, `uuid`, `pathlib` and `urllib.parse`
+- Python 3.10 or later
+- Streamlit (a recent version: the code uses `st.dialog`, keyed containers and `st.image(width="stretch")`)
+- Pillow is installed together with Streamlit and is used only to check that mood-board images can be opened
+
+Tested with: Python `[x.y.z]` and Streamlit `[x.y.z]` (check with `python --version` and `pip show streamlit`).
 
 ## Project structure
 
 ```text
 BeautyMix/
-├── beautymix.py
+├── beautymix.py                  # the whole application
 ├── requirements.txt
 ├── README.md
 ├── .gitignore
-├── products.json          # created when products are saved; local user data
-├── history.json           # created when recommendations are generated
-├── uploads/               # uploaded product photos
+├── products.json                 # created when you save a product (your data)
+├── recommendation_history.json   # created when you generate a look
+├── uploads/                      # your uploaded product photos
 └── assets/
-    ├── logo.png           # optional BeautyMix logo
-    └── looks/             # optional look inspiration images
+    ├── beautymix_logo.png        # logo shown at the top
+    ├── looks/                    # one illustration per look, e.g. clean_girl.png
+    └── my_looks/                 # optional: your own look photos (mood board)
 ```
 
-The application creates the `uploads/` and `assets/looks/` folders when it runs. The `products.json` and `history.json` files are created as needed.
+`uploads/`, `assets/looks/` and `assets/my_looks/` are created automatically if missing.
 
 ## Installation
 
-Python 3.10 or later is recommended.
+1. Download or clone this repository and open the folder in a terminal.
+2. (Recommended) create a virtual environment.
 
-1. Download or clone this repository.
-2. Open the project folder in Terminal.
-3. (Recommended) Create and activate a virtual environment.
+   macOS / Linux:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+   Windows:
+   ```bash
+   py -m venv .venv
+   .venv\Scripts\activate
+   ```
+3. Install the dependencies:
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
 
-**macOS / Linux**
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
+## Run
 
-**Windows**
-```bash
-py -m venv .venv
-.venv\Scripts\activate
-```
-
-4. Install dependencies:
-```bash
-python -m pip install -r requirements.txt
-```
-
-## Run the application
-
-From the project folder, run:
 ```bash
 python -m streamlit run beautymix.py
 ```
 
-Open the local URL shown in Terminal (usually `http://localhost:8501`). To stop the app, press `Control + C` in Terminal.
+Open the local address printed in the terminal (usually `http://localhost:8501`). Stop the app with `Ctrl + C`.
 
-## How to use
+## Quick try
 
-1. Open **Add a Product** and register makeup items. Photos are optional.
-2. Open **My Collection** to view, filter or delete saved products.
-3. Open **Create a Look**.
-4. Select a makeup vibe, occasion, weather and available time.
-5. Select **Recommend my products** to view the suggested look and products from your collection.
+The repository contains no personal data, so add a few products first:
+
+1. Open **Add a Product** and add at least one item in each category (Foundation, Blush, Eyeshadow, Lip). Photos are optional.
+2. Open **Create a Look**, choose a vibe, occasion, weather and time, then press **Create my BeautyMix look**.
+3. To use the mood board, copy photos into `assets/my_looks/` named after the look: `clean_girl.jpg` is photo 1, `clean_girl_2.png` is photo 2, `clean_girl_3.jpg` is photo 3.
 
 ## How recommendations work
 
-BeautyMix uses a rule-based recommendation approach:
+BeautyMix is a rule-based (knowledge-based) recommender. Nothing is learned from data; every rule is written in `beautymix.py`.
 
-- The selected vibe determines a pool of compatible makeup looks.
-- The occasion influences the preferred look intensity.
-- Recent look history reduces the chance of immediately repeating a look.
-- Product finish and colour are compared with the selected look's preferences.
-- Foundation finish is matched against the selected weather condition.
-- Colour coordination between selected products can increase a product's score.
-- Available time determines how many products may be selected from each category.
+- The chosen **vibe** gives a pool of looks, and the **occasion** decides how bold the look should be. Recent looks are less likely to repeat (`recommendation_history.json`).
+- Heavy looks (Baddie Glam, Icy Glam) only appear for 20 or 30 minutes and for Date, Party or Special Event.
+- Each product is **scored** on its finish, its colour group and the look's colour story. Weather changes the foundation choice only: matte for hot and humid, glowy for cold and dry, natural for mild. Blush is not changed by weather.
+- **Colour classification:** a typed colour such as "Peach Beige" is grouped by its last recognised base colour (Beige). Unknown names are kept as typed.
+- **Coordination:** colours that match products already chosen get a bonus, and only one glitter product is encouraged per look.
+- **Time:** foundation is always 1 product. 10 minutes gives 1 product per category; 20 minutes gives 1–2 blush, eyeshadow and lip; 30 minutes gives 2 blush, 2–4 eyeshadow and 2–4 lip. A palette counts as one product.
+- **Ties** are broken by what was not recommended recently, then randomly.
+- **Layering:** inside a category, matte goes first and shiny finishes last; products with the same finish go from light to deep. At most two shiny lip products are recommended together.
+- **Look rules:** Bold Lip uses a red lip with nude blush and eyeshadow; Monochromatic Makeup repeats one colour family and also suggests using the blush on the eyes.
+- Categories you do not own are skipped, with a message.
+- The score is a simple prototype score. It is not scientifically validated and is styling inspiration, not professional beauty advice.
 
-The recommendation score is a simple prototype score. It is not scientifically validated and should be treated as styling inspiration, not professional beauty advice.
+## Limitations
 
-## Current scope and limitations
+- Product details are typed in by the user. Products are not recognised from photos.
+- Only saved category, colour and finish are used. The app does not consider skin type, ingredients or real skin undertone; warm and cool suggestions are styling inspiration only.
+- Weights and colour groups (for example, red is treated as cool) are the author's own design decisions.
+- Data is stored locally and is not synchronised between devices.
 
-- Product information is entered by the user. The current version does not automatically recognise products from photos.
-- Recommendations use saved category, colour and finish information. The app does not analyse ingredients, skin type or actual skin undertone.
-- Product and recommendation-history data are stored locally in JSON files and are not synchronised between devices.
-- Look inspiration images are optional. If an image is not provided, the app displays a placeholder and a Pinterest inspiration link.
+## Future improvements
 
-## Possible future improvements
+- Help with product category from a photo (an early plan that was dropped to keep the project focused on recommendation).
+- Learn from user ratings to improve recommendations.
+- Compress uploaded images and refactor products into a class.
 
-Possible improvements include image-based product-category assistance, more detailed recommendation explanations, additional look inspiration images and more robust data management.
+## Acknowledgements and Use of GenAI
+
+- Built using Python and [Streamlit](https://streamlit.io).
+- Standard-library modules used include `collections`, `html`, `json`, `random`, `re`, `uuid`, `pathlib` and `urllib.parse`.
+- Claude (Anthropic, 2026) was used as a generative AI tool to assist with debugging and exploring possible solutions during development. All suggested changes were reviewed and tested by the author.
+
 
 ## Author
 
-Created as a student prototype project.
+Eunchae Kim, 14642918, Creative Coding, University of Technology Sydney (A2 Code Prototype Project, 2026).
